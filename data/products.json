@@ -1,0 +1,5 @@
+[
+  {"id": 1, "name": "Red Sneakers", "description": "Comfortable and stylish.", "price": 59.99, "image": "sneakers.jpg"},
+  {"id": 2, "name": "Blue Jeans", "description": "Slim fit classic.", "price": 39.99, "image": "jeans.jpg"},
+  {"id": 3, "name": "Leather Wallet", "description": "Premium leather wallet.", "price": 24.50, "image": "wallet.jpg"}
+]

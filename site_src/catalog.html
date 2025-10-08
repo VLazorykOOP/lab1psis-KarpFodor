@@ -1,0 +1,98 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>{{ page_title }} - {{ site_title }}</title>
+    <link rel="stylesheet" href="/static/style.css">
+  </head>
+  <body>
+    <header>
+      <h1>{{ site_title }}</h1>
+      <nav>
+        <a href="/index.html">Home</a> |
+        <a href="/catalog.html">Catalog</a> |
+        <a href="/cart.html">Cart</a> |
+        <a href="/contacts.html">Contacts</a>
+      </nav>
+    </header>
+    <main>
+      <h2>Product Catalog</h2>
+      <div class="products">
+      {% for p in products %}
+        <article class="product" data-id="{{p.id}}">
+          <div class="image-shine"><img src="/static/{{ p.image }}" alt="{{p.name}}"></div>
+          <h4 contenteditable="false" class="p-name">{{ p.name }}</h4>
+          <p contenteditable="false" class="p-desc">{{ p.description }}</p>
+          <p class="price">$<span contenteditable="false" class="p-price">{{ p.price }}</span></p>
+          <p>
+            <button class="edit">Edit</button>
+            <button class="save" style="display:none">Save</button>
+            <button class="delete">Delete</button>
+          </p>
+        </article>
+      {% endfor %}
+
+      <article class="product" id="add-product-card">
+        <h4 contenteditable="true" id="new-name">New product name</h4>
+        <p contenteditable="true" id="new-desc">Description...</p>
+        <p class="price">$<span contenteditable="true" id="new-price">0.0</span></p>
+        <p><button id="add-product">Add Product</button></p>
+      </article>
+      </div>
+    </main>
+    <footer>
+      <p>&copy; Store 2025</p>
+    </footer>
+    <script>
+    async function jsonPost(url, data){
+      const r = await fetch(url, {method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify(data)});
+      return r.ok ? r.json() : Promise.reject(await r.text());
+    }
+
+    document.querySelectorAll('.product').forEach(card=>{
+      const id = card.dataset.id;
+      if(!id) return;
+      const edit = card.querySelector('.edit');
+      const save = card.querySelector('.save');
+      const del = card.querySelector('.delete');
+      const name = card.querySelector('.p-name');
+      const desc = card.querySelector('.p-desc');
+      const price = card.querySelector('.p-price');
+
+      edit && edit.addEventListener('click', ()=>{
+        name.contentEditable='true'; desc.contentEditable='true'; price.contentEditable='true';
+        edit.style.display='none'; save.style.display='inline-block';
+        name.focus();
+      });
+
+      save && save.addEventListener('click', async ()=>{
+        try{
+          const body = {id:id, name:name.innerText.trim(), description:desc.innerText.trim(), price:price.innerText.trim()};
+          await jsonPost('/api/update_product', body);
+          name.contentEditable='false'; desc.contentEditable='false'; price.contentEditable='false';
+          save.style.display='none'; edit.style.display='inline-block';
+        }catch(e){ alert('Save failed: '+e); }
+      });
+
+      del && del.addEventListener('click', async ()=>{
+        if(!confirm('Delete this product?')) return;
+        try{
+          await jsonPost('/api/delete_product', {id:id});
+          card.remove();
+        }catch(e){ alert('Delete failed: '+e); }
+      });
+    });
+
+    document.getElementById('add-product')?.addEventListener('click', async ()=>{
+      const name = document.getElementById('new-name').innerText.trim();
+      const desc = document.getElementById('new-desc').innerText.trim();
+      const price = document.getElementById('new-price').innerText.trim();
+      try{
+        const res = await jsonPost('/api/add_product', {name, description:desc, price});
+
+        location.reload();
+      }catch(e){ alert('Add failed: '+e); }
+    });
+    </script>
+  </body>
+</html>

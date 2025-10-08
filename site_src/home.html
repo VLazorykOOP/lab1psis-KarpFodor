@@ -1,0 +1,39 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>{{ page_title }} - {{ site_title }}</title>
+    <link rel="stylesheet" href="/static/style.css">
+  </head>
+  <body>
+    <header>
+      <h1>{{ site_title }}</h1>
+      <nav>
+        <a href="/index.html">Home</a> |
+        <a href="/catalog.html">Catalog</a> |
+        <a href="/cart.html">Cart</a> |
+        <a href="/contacts.html">Contacts</a>
+      </nav>
+    </header>
+    <main>
+      <h2>Welcome to store</h2>
+      <p>Our online store offers a wide selection of quality products at affordable prices. Easy navigation, quick ordering.</p>
+      <section>
+        <h3>Featured products</h3>
+        <div class="products">
+        {% for p in products[:3] %}
+          <article class="product">
+            <img src="/static/{{ p.image }}" alt="{{p.name}}">
+            <h4>{{ p.name }}</h4>
+            <p>{{ p.description }}</p>
+            <p class="price">${{ p.price }}</p>
+          </article>
+        {% endfor %}
+        </div>
+      </section>
+    </main>
+    <footer>
+      <p>&copy; Store 2025</p>
+    </footer>
+  </body>
+</html>
