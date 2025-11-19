@@ -1,4 +1,4 @@
-# Online Store (Flask + nginx)
+# Online Store 
 
 Build the image:
    docker build -t demo-store .
@@ -10,3 +10,4 @@ Open http://localhost:8080
 
  Run `python app.py` and open `http://127.0.0.1:8000/site/index.html` and `http://127.0.0.1:8000/admin`.
 # Site_Docker
+
