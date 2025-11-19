@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  demo-store:
+    build: .
+    image: demo-store:latest
+    container_name: demo-store
+    ports:
+      - "8080:80"   
+      - "8000:8000" 
+    environment:
+      - SITE_OUT_DIR=/app/site
+      - FLASK_ENV=development
+    volumes:
+      - ./site_src:/app/site_src:rw
+      - ./static:/app/static:rw
+      - ./data:/app/data:rw
+      - ./app.py:/app/app.py:rw
+    restart: unless-stopped
+  db:
+    image: postgres:15
+    container_name: demo-store-db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=demo_store
+      - POSTGRES_USER=demo_user
+      - POSTGRES_PASSWORD=demo_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data:rw
+
+volumes:
+  db_data:
+    driver: local
