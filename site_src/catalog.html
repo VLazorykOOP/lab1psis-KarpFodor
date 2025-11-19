@@ -11,7 +11,7 @@
       <nav>
         <a href="/index.html">Home</a> |
         <a href="/catalog.html">Catalog</a> |
-        <a href="/cart.html">Cart</a> |
+        <a href="/cart.html">Cart <span id="cart-count" style="font-weight:700">(0)</span></a> |
         <a href="/contacts.html">Contacts</a>
       </nav>
     </header>
@@ -25,6 +25,7 @@
           <p contenteditable="false" class="p-desc">{{ p.description }}</p>
           <p class="price">$<span contenteditable="false" class="p-price">{{ p.price }}</span></p>
           <p>
+            <button class="add-cart">Add to cart</button>
             <button class="edit">Edit</button>
             <button class="save" style="display:none">Save</button>
             <button class="delete">Delete</button>
@@ -46,18 +47,33 @@
     <script>
     async function jsonPost(url, data){
       const r = await fetch(url, {method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify(data)});
+      if(r.ok) return r.json();
+      const txt = await r.text();
+      try{ const j = JSON.parse(txt); throw new Error(j.error || JSON.stringify(j)); }catch(e){ throw new Error((r.status?('HTTP '+r.status+' - '):'') + txt); }
+    }
+
+    async function jsonGet(url){
+      const r = await fetch(url);
       return r.ok ? r.json() : Promise.reject(await r.text());
     }
 
     document.querySelectorAll('.product').forEach(card=>{
       const id = card.dataset.id;
       if(!id) return;
+      const addBtn = card.querySelector('.add-cart');
       const edit = card.querySelector('.edit');
       const save = card.querySelector('.save');
       const del = card.querySelector('.delete');
       const name = card.querySelector('.p-name');
       const desc = card.querySelector('.p-desc');
       const price = card.querySelector('.p-price');
+
+      addBtn && addBtn.addEventListener('click', async ()=>{
+        try{
+          await jsonPost('/api/cart_add', {id: id, qty: 1});
+          updateCartCount();
+        }catch(e){ alert('Add to cart failed: '+(e && e.message? e.message : e)); }
+      });
 
       edit && edit.addEventListener('click', ()=>{
         name.contentEditable='true'; desc.contentEditable='true'; price.contentEditable='true';
@@ -93,6 +109,17 @@
         location.reload();
       }catch(e){ alert('Add failed: '+e); }
     });
+
+    async function updateCartCount(){
+      try{
+        const res = await jsonGet('/api/cart_get');
+        const count = res.items.reduce((s,i)=>s + (i.qty||0), 0);
+        document.getElementById('cart-count').innerText = '('+count+')';
+      }catch(e){ /* ignore */ }
+    }
+
+    // initial load
+    (async ()=>{ await updateCartCount(); })();
     </script>
   </body>
 </html>
